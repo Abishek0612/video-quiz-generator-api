@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <p align="center">
   <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
 </p>
@@ -96,3 +97,7 @@ Nest is an MIT-licensed open source project. It can grow thanks to the sponsors 
 ## License
 
 Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+=======
+# video-quiz-generator-api
+A sophisticated NestJS-powered backend service that transforms educational video content into interactive learning experiences. This system automatically transcribes lecture videos and generates contextual multiple-choice questions using locally-hosted AI models, ensuring complete data privacy and offline capability.
+>>>>>>> 6a96f519ba645b982bce32aa7f21268b3e7a6a77
