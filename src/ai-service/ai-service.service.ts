@@ -51,7 +51,7 @@ export class AiServiceService {
           headers: {
             'Content-Type': 'multipart/form-data',
           },
-          timeout: 300000,
+          timeout: 300000, // 5 minutes \
         },
       );
 
