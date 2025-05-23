@@ -143,7 +143,6 @@ export class QuestionsService {
   }
 
   private exportAsMoodle(questions: QuestionDocument[]): string {
-    // Moodle XML format
     const xml = questions
       .map(
         (q) => `

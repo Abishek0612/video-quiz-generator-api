@@ -6,6 +6,4 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
 @Controller('transcription')
-export class TranscriptionController {
-  // Transcription endpoints are handled through the videos module
-}
+export class TranscriptionController {}
