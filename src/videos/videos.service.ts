@@ -10,6 +10,7 @@ import { TranscriptionService } from '../transcription/transcription.service';
 import { QuestionsService } from '../questions/questions.service';
 import * as fs from 'fs';
 import * as path from 'path';
+import * as ffmpeg from 'fluent-ffmpeg';
 
 @Injectable()
 export class VideosService {
@@ -22,6 +23,7 @@ export class VideosService {
   async uploadVideo(
     file: Express.Multer.File,
     userId: string,
+    language?: string,
   ): Promise<VideoDocument> {
     try {
       const duration = await this.getVideoDuration(file.path);
@@ -35,6 +37,7 @@ export class VideosService {
         duration,
         uploadedBy: new Types.ObjectId(userId),
         status: ProcessingStatus.UPLOADED,
+        language: language || 'en',
       });
 
       const savedVideo = await video.save();
@@ -72,11 +75,11 @@ export class VideosService {
         60,
       );
 
-      const questions =
-        await this.questionsService.generateQuestionsForVideo(video);
+      await this.questionsService.generateQuestionsForVideo(video);
 
       await this.updateVideoStatus(videoId, ProcessingStatus.COMPLETED, 100);
     } catch (error) {
+      console.error('Video processing error:', error);
       await this.updateVideoStatus(
         videoId,
         ProcessingStatus.FAILED,
@@ -100,7 +103,15 @@ export class VideosService {
   }
 
   private async getVideoDuration(filePath: string): Promise<number> {
-    return 3600;
+    return new Promise((resolve, reject) => {
+      ffmpeg.ffprobe(filePath, (err, metadata) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(metadata.format.duration || 0);
+        }
+      });
+    });
   }
 
   async findAllByUser(userId: string): Promise<VideoDocument[]> {
@@ -111,9 +122,9 @@ export class VideosService {
   }
 
   async findOne(id: string, userId?: string): Promise<VideoDocument> {
-    const query = { _id: new Types.ObjectId(id) };
+    const query: any = { _id: new Types.ObjectId(id) };
     if (userId) {
-      query['uploadedBy'] = new Types.ObjectId(userId);
+      query.uploadedBy = new Types.ObjectId(userId);
     }
 
     const video = await this.videoModel.findOne(query).exec();
@@ -121,6 +132,15 @@ export class VideosService {
       throw new NotFoundException('Video not found');
     }
     return video;
+  }
+
+  async getProcessingStatus(id: string, userId: string) {
+    const video = await this.findOne(id, userId);
+    return {
+      status: video.status,
+      progress: video.processingProgress,
+      error: video.processingError,
+    };
   }
 
   async deleteVideo(id: string, userId: string): Promise<void> {

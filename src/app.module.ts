@@ -4,10 +4,27 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { MulterModule } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
-import { extname } from 'path';
+import { extname, join } from 'path';
+import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { AuthModule } from './auth/auth.module';
+import { UsersModule } from './users/users.module';
+import { VideosModule } from './videos/videos.module';
+import { TranscriptionModule } from './transcription/transcription.module';
+import { QuestionsModule } from './questions/questions.module';
+import { AdminModule } from './admin/admin.module';
+import { AiServiceModule } from './ai-service/ai-service.module';
+
+import { HttpExceptionFilter } from './common/filters/http-exception.filter';
+import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
+import * as fs from 'fs';
+
+const uploadDir = './uploads';
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
 
 @Module({
   imports: [
@@ -40,7 +57,7 @@ import { AppService } from './app.service';
         },
       }),
       fileFilter: (req, file, callback) => {
-        if (!file.originalname.match(/\.(mp4|avi|mov|wmv)$/)) {
+        if (!file.originalname.match(/\.(mp4|avi|mov|wmv|mkv)$/)) {
           return callback(new Error('Only video files are allowed!'), false);
         }
         callback(null, true);
@@ -49,8 +66,26 @@ import { AppService } from './app.service';
         fileSize: 1024 * 1024 * 1024, // 1GB limit
       },
     }),
+
+    AuthModule,
+    UsersModule,
+    VideosModule,
+    TranscriptionModule,
+    QuestionsModule,
+    AdminModule,
+    AiServiceModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_FILTER,
+      useClass: HttpExceptionFilter,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
+    },
+  ],
 })
 export class AppModule {}
