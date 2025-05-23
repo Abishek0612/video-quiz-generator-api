@@ -2,12 +2,10 @@ import {
   Controller,
   Get,
   Patch,
-  Delete,
   Param,
   Body,
   UseGuards,
   Query,
-  Header,
   Res,
 } from '@nestjs/common';
 import { Response } from 'express';
@@ -17,6 +15,12 @@ import { UpdateQuestionDto } from './dto/update-question.dto';
 import { ExportQuestionsDto, ExportFormat } from './dto/export-questions.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
+
+interface CurrentUserType {
+  userId: string;
+  email: string;
+  role: string;
+}
 
 @ApiTags('questions')
 @ApiBearerAuth()
@@ -42,7 +46,7 @@ export class QuestionsController {
   async update(
     @Param('id') id: string,
     @Body() updateDto: UpdateQuestionDto,
-    @CurrentUser() user: any,
+    @CurrentUser() user: CurrentUserType,
   ) {
     return this.questionsService.update(id, updateDto, user.userId);
   }
@@ -54,12 +58,10 @@ export class QuestionsController {
     @Query() exportDto: ExportQuestionsDto,
     @Res() res: Response,
   ) {
-    const data = await this.questionsService.exportQuestions(
-      videoId,
-      exportDto.format,
-    );
+    const format = exportDto.format || ExportFormat.JSON;
+    const data = await this.questionsService.exportQuestions(videoId, format);
 
-    switch (exportDto.format) {
+    switch (format) {
       case ExportFormat.CSV:
         res.setHeader('Content-Type', 'text/csv');
         res.setHeader(

@@ -9,6 +9,7 @@ import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
 import * as bcrypt from 'bcrypt';
 import { JwtPayload } from './strategies/jwt.strategy';
+import { Types } from 'mongoose';
 
 @Injectable()
 export class AuthService {
@@ -29,8 +30,9 @@ export class AuthService {
       password: hashedPassword,
     });
 
+    const userId = (user._id as Types.ObjectId).toString();
     const payload: JwtPayload = {
-      sub: user._id.toString(),
+      sub: userId,
       email: user.email,
       role: user.role,
     };
@@ -53,10 +55,11 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    await this.usersService.updateLastLogin(user._id.toString());
+    const userId = (user._id as Types.ObjectId).toString();
+    await this.usersService.updateLastLogin(userId);
 
     const payload: JwtPayload = {
-      sub: user._id.toString(),
+      sub: userId,
       email: user.email,
       role: user.role,
     };

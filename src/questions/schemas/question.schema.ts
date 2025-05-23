@@ -18,60 +18,60 @@ export enum QuestionDifficulty {
 @Schema({ timestamps: true })
 export class Question {
   @Prop({ type: Types.ObjectId, ref: 'Video', required: true })
-  videoId: Types.ObjectId;
+  videoId!: Types.ObjectId;
 
   @Prop({ required: true })
-  segmentIndex: number;
+  segmentIndex!: number;
 
   @Prop({ required: true })
-  startTime: number;
+  startTime!: number;
 
   @Prop({ required: true })
-  endTime: number;
+  endTime!: number;
 
   @Prop({
     type: String,
     enum: QuestionType,
     default: QuestionType.MULTIPLE_CHOICE,
   })
-  type: QuestionType;
+  type!: QuestionType;
 
   @Prop({ required: true })
-  question: string;
+  question!: string;
 
   @Prop([{ type: String }])
-  options: string[];
+  options!: string[];
 
   @Prop({ required: true })
-  correctAnswer: string;
+  correctAnswer!: string;
 
   @Prop()
-  explanation: string;
+  explanation!: string;
 
   @Prop({
     type: String,
     enum: QuestionDifficulty,
     default: QuestionDifficulty.MEDIUM,
   })
-  difficulty: QuestionDifficulty;
+  difficulty!: QuestionDifficulty;
 
   @Prop({ type: Types.ObjectId, ref: 'User' })
-  createdBy: Types.ObjectId;
+  createdBy!: Types.ObjectId;
 
   @Prop({ type: Types.ObjectId, ref: 'User' })
-  lastModifiedBy: Types.ObjectId;
+  lastModifiedBy!: Types.ObjectId;
 
   @Prop({ default: false })
-  isReviewed: boolean;
+  isReviewed!: boolean;
 
   @Prop({ default: true })
-  isActive: boolean;
+  isActive!: boolean;
 
   @Prop()
-  tags: string[];
+  tags!: string[];
 
   @Prop()
-  sourceText: string;
+  sourceText!: string;
 }
 
 export const QuestionSchema = SchemaFactory.createForClass(Question);

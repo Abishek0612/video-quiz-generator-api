@@ -12,22 +12,22 @@ import { UserRole } from '../../common/enums/user-role.enum';
 export class CreateUserDto {
   @IsEmail()
   @IsNotEmpty()
-  email: string;
+  email!: string;
 
   @IsString()
   @IsNotEmpty()
   @MinLength(6)
-  password: string;
+  password!: string;
 
   @IsString()
   @IsNotEmpty()
   @MaxLength(50)
-  firstName: string;
+  firstName!: string;
 
   @IsString()
   @IsNotEmpty()
   @MaxLength(50)
-  lastName: string;
+  lastName!: string;
 
   @IsEnum(UserRole)
   @IsOptional()

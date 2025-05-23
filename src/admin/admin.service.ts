@@ -9,6 +9,16 @@ import {
 } from '../questions/schemas/question.schema';
 import { AdminStatsDto } from './dto/admin-stats.dto';
 
+interface VideosByStatusResult {
+  _id: string;
+  count: number;
+}
+
+interface RecentVideo {
+  originalName: string;
+  createdAt: Date;
+}
+
 @Injectable()
 export class AdminService {
   constructor(
@@ -34,7 +44,7 @@ export class AdminService {
       this.getRecentVideos(),
     ]);
 
-    const recentActivity = recentVideos.map((video) => ({
+    const recentActivity = recentVideos.map((video: RecentVideo) => ({
       type: 'video_upload',
       description: `${video.originalName} uploaded`,
       timestamp: video.createdAt,
@@ -51,7 +61,7 @@ export class AdminService {
   }
 
   private async getVideosByStatus(): Promise<Record<string, number>> {
-    const result = await this.videoModel.aggregate([
+    const result = await this.videoModel.aggregate<VideosByStatusResult>([
       {
         $group: {
           _id: '$status',
@@ -60,18 +70,22 @@ export class AdminService {
       },
     ]);
 
-    return result.reduce((acc, item) => {
-      acc[item._id] = item.count;
-      return acc;
-    }, {});
+    return result.reduce(
+      (acc: Record<string, number>, item: VideosByStatusResult) => {
+        acc[item._id] = item.count;
+        return acc;
+      },
+      {},
+    );
   }
 
-  private async getRecentVideos(): Promise<any[]> {
+  private async getRecentVideos(): Promise<RecentVideo[]> {
     return this.videoModel
       .find()
       .sort({ createdAt: -1 })
       .limit(10)
       .select('originalName createdAt')
+      .lean<RecentVideo[]>()
       .exec();
   }
 
@@ -106,7 +120,7 @@ export class AdminService {
       .exec();
   }
 
-  async reviewQuestion(questionId: string): Promise<QuestionDocument> {
+  async reviewQuestion(questionId: string): Promise<QuestionDocument | null> {
     return this.questionModel.findByIdAndUpdate(
       questionId,
       { isReviewed: true },

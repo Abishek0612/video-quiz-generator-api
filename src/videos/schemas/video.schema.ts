@@ -14,35 +14,35 @@ export enum ProcessingStatus {
 @Schema({ timestamps: true })
 export class Video {
   @Prop({ required: true })
-  filename: string;
+  filename!: string;
 
   @Prop({ required: true })
-  originalName: string;
+  originalName!: string;
 
   @Prop({ required: true })
-  filePath: string;
+  filePath!: string;
 
   @Prop({ required: true })
-  fileSize: number;
+  fileSize!: number;
 
   @Prop({ required: true })
-  mimeType: string;
+  mimeType!: string;
 
   @Prop({ required: true })
-  duration: number; // in seconds
+  duration!: number; // in seconds
 
   @Prop({
     type: String,
     enum: ProcessingStatus,
     default: ProcessingStatus.UPLOADED,
   })
-  status: ProcessingStatus;
+  status!: ProcessingStatus;
 
   @Prop({ type: Types.ObjectId, ref: 'User', required: true })
-  uploadedBy: Types.ObjectId;
+  uploadedBy!: Types.ObjectId;
 
   @Prop()
-  transcriptionText: string;
+  transcriptionText!: string;
 
   @Prop([
     {
@@ -52,7 +52,7 @@ export class Video {
       segmentIndex: { type: Number, required: true },
     },
   ])
-  transcriptionSegments: Array<{
+  transcriptionSegments!: Array<{
     startTime: number;
     endTime: number;
     text: string;
@@ -60,13 +60,13 @@ export class Video {
   }>;
 
   @Prop()
-  language: string;
+  language!: string;
 
   @Prop()
-  processingError: string;
+  processingError!: string;
 
   @Prop({ default: 0 })
-  processingProgress: number;
+  processingProgress!: number;
 }
 
 export const VideoSchema = SchemaFactory.createForClass(Video);

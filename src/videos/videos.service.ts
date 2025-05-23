@@ -2,6 +2,8 @@ import {
   Injectable,
   NotFoundException,
   BadRequestException,
+  Inject,
+  forwardRef,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
@@ -9,7 +11,6 @@ import { Video, VideoDocument, ProcessingStatus } from './schemas/video.schema';
 import { TranscriptionService } from '../transcription/transcription.service';
 import { QuestionsService } from '../questions/questions.service';
 import * as fs from 'fs';
-import * as path from 'path';
 import * as ffmpeg from 'fluent-ffmpeg';
 
 @Injectable()
@@ -42,7 +43,10 @@ export class VideosService {
 
       const savedVideo = await video.save();
 
-      this.processVideoAsync(savedVideo._id.toString());
+      // Process video asynchronously without blocking
+      void this.processVideoAsync(
+        (savedVideo._id as Types.ObjectId).toString(),
+      );
 
       return savedVideo;
     } catch (error) {
@@ -54,9 +58,13 @@ export class VideosService {
   }
 
   async processVideoAsync(videoId: string): Promise<void> {
+    let video: VideoDocument | null = null;
+
     try {
-      const video = await this.videoModel.findById(videoId);
+      video = await this.videoModel.findById(videoId);
       if (!video) throw new NotFoundException('Video not found');
+
+      const userId = (video.uploadedBy as Types.ObjectId).toString();
 
       await this.updateVideoStatus(videoId, ProcessingStatus.TRANSCRIBING, 10);
 
@@ -84,7 +92,7 @@ export class VideosService {
         videoId,
         ProcessingStatus.FAILED,
         0,
-        error.message,
+        error instanceof Error ? error.message : 'Unknown error',
       );
     }
   }
@@ -95,20 +103,25 @@ export class VideosService {
     progress: number,
     error?: string,
   ): Promise<void> {
-    await this.videoModel.findByIdAndUpdate(videoId, {
+    const updateData: Partial<VideoDocument> = {
       status,
       processingProgress: progress,
-      ...(error && { processingError: error }),
-    });
+    };
+
+    if (error) {
+      updateData.processingError = error;
+    }
+
+    await this.videoModel.findByIdAndUpdate(videoId, updateData);
   }
 
   private async getVideoDuration(filePath: string): Promise<number> {
     return new Promise((resolve, reject) => {
-      ffmpeg.ffprobe(filePath, (err, metadata) => {
+      ffmpeg.ffprobe(filePath, (err: Error | null, metadata: any) => {
         if (err) {
-          reject(err);
+          reject(new Error(`Failed to get video duration: ${err.message}`));
         } else {
-          resolve(metadata.format.duration || 0);
+          resolve(metadata?.format?.duration || 0);
         }
       });
     });
@@ -151,7 +164,6 @@ export class VideosService {
     }
 
     await this.questionsService.deleteQuestionsByVideoId(id);
-
     await this.videoModel.findByIdAndDelete(id);
   }
 }

@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:7.0
+    container_name: video-quiz-mongo
+    ports:
+      - '27017:27017'
+    volumes:
+      - mongodb_data:/data/db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password
+
+  backend:
+    build: .
+    container_name: video-quiz-backend
+    ports:
+      - '3001:3001'
+    volumes:
+      - ./uploads:/app/uploads
+    environment:
+      NODE_ENV: development
+      MONGODB_URI: mongodb://admin:password@mongodb:27017/video-quiz-db?authSource=admin
+      JWT_SECRET: your-super-secret-jwt-key
+      AI_SERVICE_URL: http://ai-service:8000
+    depends_on:
+      - mongodb
+      - ai-service
+
+  ai-service:
+    build: ./ai-service
+    container_name: video-quiz-ai
+    ports:
+      - '8000:8000'
+    volumes:
+      - ./ai-service:/app
+    environment:
+      PYTHONPATH: /app
+
+volumes:
+  mongodb_data:

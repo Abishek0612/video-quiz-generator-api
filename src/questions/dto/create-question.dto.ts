@@ -9,30 +9,30 @@ import { QuestionType, QuestionDifficulty } from '../schemas/question.schema';
 
 export class CreateQuestionDto {
   @IsString()
-  videoId: string;
+  videoId!: string;
 
   @IsNumber()
-  segmentIndex: number;
+  segmentIndex!: number;
 
   @IsNumber()
-  startTime: number;
+  startTime!: number;
 
   @IsNumber()
-  endTime: number;
+  endTime!: number;
 
   @IsEnum(QuestionType)
   @IsOptional()
   type?: QuestionType;
 
   @IsString()
-  question: string;
+  question!: string;
 
   @IsArray()
   @IsString({ each: true })
-  options: string[];
+  options!: string[];
 
   @IsString()
-  correctAnswer: string;
+  correctAnswer!: string;
 
   @IsString()
   @IsOptional()
