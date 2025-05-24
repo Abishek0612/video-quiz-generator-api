@@ -39,7 +39,7 @@ class QuestionRequest(BaseModel):
     start_time: float = Field(..., ge=0, description="Start time in seconds")
     end_time: float = Field(..., gt=0, description="End time in seconds")
     language: str = Field(default="en", description="Language code")
-    difficulty: str = Field(default="medium", regex="^(easy|medium|hard)$")
+    difficulty: str = Field(default="medium", pattern="^(easy|medium|hard)$")
     question_count: int = Field(default=3, ge=1, le=10, description="Number of questions")
 
 class Question(BaseModel):

@@ -15,6 +15,7 @@ import { VideosModule } from './videos/videos.module';
 import { TranscriptionModule } from './transcription/transcription.module';
 import { QuestionsModule } from './questions/questions.module';
 import { AdminModule } from './admin/admin.module';
+import { DatabaseModule } from './database/database.module';
 import { AiServiceModule } from './ai-service/ai-service.module';
 
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
@@ -28,6 +29,7 @@ if (!fs.existsSync(uploadDir)) {
 
 @Module({
   imports: [
+    DatabaseModule,
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env',

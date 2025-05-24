@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   mongodb:
     image: mongo:7.0
@@ -29,12 +27,12 @@ services:
       - ai-service
 
   ai-service:
-    build: ./ai-service
+    build: ./src/ai-service
     container_name: video-quiz-ai
     ports:
       - '8000:8000'
     volumes:
-      - ./ai-service:/app
+      - ./src/ai-service:/app
     environment:
       PYTHONPATH: /app
 
